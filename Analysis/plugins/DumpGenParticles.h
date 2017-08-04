@@ -12,6 +12,7 @@
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
+#include "DataFormats/JetReco/interface/GenJet.h"
 
 
 
@@ -29,10 +30,13 @@ private:
   virtual void endJob() override {};
   
   const reco::GenParticle* IsDecayed(const reco::GenParticle*);
-  
+  void GetFinalStateDaughters(const reco::GenParticle* particle, std::vector<const reco::GenParticle*>& daughters);
+    
   //---inputs
-  edm::Handle<reco::GenParticleCollection> genParticlesHandle_;
+  edm::Handle<reco::GenParticleCollection>     genParticlesHandle_;
   edm::EDGetTokenT<reco::GenParticleCollection> genParticlesToken_;
+  edm::Handle<edm::View<reco::GenJet> >             genJetsHandle_;
+  edm::EDGetTokenT<edm::View<reco::GenJet> >         genJetsToken_;
   bool verbosity_;
   
   //---outputs

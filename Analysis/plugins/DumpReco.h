@@ -16,13 +16,14 @@
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 
 #include "DataFormats/Common/interface/RefToBase.h"
+#include "DataFormats/Common/interface/TriggerResults.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
-#include "DataFormats/TrackReco/interface/Track.h"
-#include "DataFormats/TrackReco/interface/TrackFwd.h"
-#include "DataFormats/MuonReco/interface/Muon.h"
-#include "DataFormats/MuonReco/interface/MuonFwd.h"
-#include "DataFormats/MuonReco/interface/MuonSelectors.h"
+#include "DataFormats/PatCandidates/interface/Muon.h"
+#include "DataFormats/PatCandidates/interface/Tau.h"
+#include "DataFormats/PatCandidates/interface/Jet.h"
+#include "DataFormats/PatCandidates/interface/PackedCandidate.h"
+#include "DataFormats/PatCandidates/interface/PackedTriggerPrescales.h"
 
 
 
@@ -44,12 +45,20 @@ private:
   int entry_;
   
   //---inputs
-  edm::EDGetTokenT<reco::VertexCollection>    vtxsToken_;
-  edm::Handle<reco::VertexCollection>        vtxsHandle_;    
-  edm::EDGetTokenT<edm::View<reco::Track> > tracksToken_;
-  edm::Handle<edm::View<reco::Track> >     tracksHandle_; 
-  edm::EDGetTokenT<reco::MuonCollection>     muonsToken_;
-  edm::Handle<reco::MuonCollection>         muonsHandle_;    
+  edm::EDGetTokenT<edm::TriggerResults>                      trgsToken_;
+  edm::Handle<edm::TriggerResults>                          trgsHandle_;
+  edm::EDGetTokenT<pat::PackedTriggerPrescales>      trgPrescalesToken_;
+  edm::Handle<pat::PackedTriggerPrescales>          trgPrescalesHandle_;
+  edm::EDGetTokenT<reco::VertexCollection>                   vtxsToken_;
+  edm::Handle<reco::VertexCollection>                       vtxsHandle_;    
+  edm::EDGetTokenT<edm::View<pat::PackedCandidate> > pfCandidatesToken_;
+  edm::Handle<edm::View<pat::PackedCandidate> >     pfCandidatesHandle_; 
+  edm::EDGetTokenT<pat::MuonCollection>                     muonsToken_;
+  edm::Handle<pat::MuonCollection>                         muonsHandle_;
+  edm::Handle<pat::TauCollection>                           tausHandle_;
+  edm::EDGetTokenT<pat::TauCollection>                       tausToken_;
+  edm::Handle<pat::JetCollection>                           jetsHandle_;
+  edm::EDGetTokenT<pat::JetCollection>                       jetsToken_;
   
   //---options
   

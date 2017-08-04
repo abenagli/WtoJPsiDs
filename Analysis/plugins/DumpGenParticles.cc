@@ -4,6 +4,7 @@
 
 DumpGenParticles::DumpGenParticles(const edm::ParameterSet& pSet):
   genParticlesToken_(consumes<reco::GenParticleCollection>(pSet.getUntrackedParameter<edm::InputTag>("genParticlesTag"))),
+  genJetsToken_     (consumes<edm::View<reco::GenJet> >   (pSet.getUntrackedParameter<edm::InputTag>("genJetsTag"))),
   verbosity_(pSet.getParameter<bool>("verbosity"))
 {
   //---TFileService for output ntuples
@@ -45,9 +46,8 @@ void DumpGenParticles::analyze(const edm::Event& iEvent, const edm::EventSetup& 
   for(size_t i = 0; i < genParticles.size(); ++i)
   {
     auto genParticle = genParticles[i];
-    // {
-    //   std::cout << &genParticle << std::endl;
-    // }
+    
+    // std::cout << &genParticle << std::endl;
     
     // save resonance
     if ( ( abs(genParticle.pdgId()) == 23 ||
@@ -116,16 +116,23 @@ void DumpGenParticles::analyze(const edm::Event& iEvent, const edm::EventSetup& 
         for(size_t jj = 0; jj < daughter->numberOfDaughters(); ++jj)
         {
           const reco::GenParticle* daughter2 = (const reco::GenParticle*)(daughter -> daughter(jj));
-          resonanceDaughters2_[resonance][daughter].push_back( daughter2 );
           
-          temp_pt.push_back( daughter2->pt() );
-          temp_eta.push_back( daughter2->eta() );
-          temp_phi.push_back( daughter2->phi() );
-          temp_energy.push_back( daughter2->energy() );
-          temp_mass.push_back( daughter2->mass() );
-          temp_charge.push_back( daughter2->charge() );
-          temp_pdgId.push_back( daughter2->pdgId() );
-          temp_name.push_back( GetParticleName(daughter2->pdgId()) );
+          std::vector<const reco::GenParticle*> finalStateDaughters;
+          GetFinalStateDaughters(daughter2,finalStateDaughters);
+          
+          for(size_t zz = 0; zz < finalStateDaughters.size(); ++zz)
+          {          
+            resonanceDaughters2_[resonance][daughter].push_back( finalStateDaughters.at(zz) );
+            
+            temp_pt.push_back( finalStateDaughters.at(zz)->pt() );
+            temp_eta.push_back( finalStateDaughters.at(zz)->eta() );
+            temp_phi.push_back( finalStateDaughters.at(zz)->phi() );
+            temp_energy.push_back( finalStateDaughters.at(zz)->energy() );
+            temp_mass.push_back( finalStateDaughters.at(zz)->mass() );
+            temp_charge.push_back( finalStateDaughters.at(zz)->charge() );
+            temp_pdgId.push_back( finalStateDaughters.at(zz)->pdgId() );
+            temp_name.push_back( GetParticleName(finalStateDaughters.at(zz)->pdgId()) );
+          }
         }
         
         dau2_n.push_back( daughter->numberOfDaughters() );
@@ -283,18 +290,7 @@ void DumpGenParticles::analyze(const edm::Event& iEvent, const edm::EventSetup& 
   if( verbosity_ )
   {
     std::cout << "--------------------------" << std::endl;
-    /*
-      for(unsigned int jj = 0; jj < selectedTop->size(); ++jj)
-      {
-      std::cout << ">>> TOP -- pdgId: " << std::fixed << std::setw(4) << (*selectedTop)[jj].pdgId()
-      << "   status: " << std::fixed << std::setw(4) << (*selectedTop)[jj].status()
-      << "   pT: "     << std::fixed << std::setprecision(2) << std::setw(8)  << (*selectedTop)[jj].pt()
-      << "   eta: "    << std::fixed << std::setprecision(2) << std::setw(10) << (*selectedTop)[jj].eta()
-      << "   mass: "   << std::fixed << std::setprecision(2) << std::setw(10) << (*selectedTop)[jj].mass()
-      << std::endl;
-      }
-    */
-    
+ 
     std::cout << ">>> RESONANCES" << std::endl;
     for(unsigned int ii = 0; ii < resonances_.size(); ++ii)
     {
@@ -316,6 +312,16 @@ void DumpGenParticles::analyze(const edm::Event& iEvent, const edm::EventSetup& 
     std::cout << "<<< RESONANCES" << std::endl;
     
     /*
+      for(unsigned int jj = 0; jj < selectedTop->size(); ++jj)
+      {
+      std::cout << ">>> TOP -- pdgId: " << std::fixed << std::setw(4) << (*selectedTop)[jj].pdgId()
+      << "   status: " << std::fixed << std::setw(4) << (*selectedTop)[jj].status()
+      << "   pT: "     << std::fixed << std::setprecision(2) << std::setw(8)  << (*selectedTop)[jj].pt()
+      << "   eta: "    << std::fixed << std::setprecision(2) << std::setw(10) << (*selectedTop)[jj].eta()
+      << "   mass: "   << std::fixed << std::setprecision(2) << std::setw(10) << (*selectedTop)[jj].mass()
+      << std::endl;
+      }
+
       for(unsigned int jj = 0; jj < selectedBoson->size(); ++jj)
       {
       std::cout << ">>>     BOSON -- pdgId: " << std::fixed << std::setw(4) << (*selectedBoson)[jj].pdgId()
@@ -357,6 +363,23 @@ void DumpGenParticles::analyze(const edm::Event& iEvent, const edm::EventSetup& 
   }
   
   
+  //---load gen jets
+  iEvent.getByToken(genJetsToken_,genJetsHandle_);
+  auto genJets = *genJetsHandle_.product();
+
+  outTree_.genJets_n = genJets.size();  
+  for(size_t i = 0; i < genJets.size(); ++i)
+  {
+    auto genJet = genJets[i];
+    
+    outTree_.genJets_pt       -> push_back( genJet.pt() );
+    outTree_.genJets_eta      -> push_back( genJet.eta() );
+    outTree_.genJets_phi      -> push_back( genJet.phi() );
+    outTree_.genJets_energy   -> push_back( genJet.energy() );
+    outTree_.genJets_numberOfDaughters -> push_back( genJet.numberOfDaughters() );
+  }
+  
+  
   outTree_.GetTTreePtr()->Fill();
   ++entry_;
 }
@@ -375,33 +398,27 @@ const reco::GenParticle* DumpGenParticles::IsDecayed(const reco::GenParticle* pa
 }
 
 
-// const reco::GenParticle* DumpGenParticles::TopFound(const reco::GenParticle * particle)
-// {
-//   return particle;
-// }
+
+void DumpGenParticles::GetFinalStateDaughters(const reco::GenParticle* particle, std::vector<const reco::GenParticle*>& daughters)
+{
+  if( particle->status() == 1 )
+  {
+    daughters.push_back( particle );
+    return;
+  }
+  
+  else
+  {
+    for(size_t i = 0; i< particle->numberOfDaughters(); ++i)
+    {    
+      GetFinalStateDaughters( (const reco::GenParticle*)(particle->daughter(i)),daughters );
+    }
+  }
+  
+  return;
+}
 
 
-// const reco::GenParticle* DumpGenParticles::BosonFound(const reco::GenParticle * particle)
-// {
-//   for(size_t i=0;i< particle->numberOfDaughters();i++)
-//   {
-//     if(abs(particle->daughter(i)->pdgId())==24 || abs(particle->daughter(i)->pdgId())==23)
-//       return BosonFound((reco::GenParticle*)particle->daughter(i));
-//   }
-//   return particle;
-// }
-
-
-
-// const reco::GenParticle* DumpGenParticles::TauFound(const reco::GenParticle * particle)
-// {
-//   for(size_t i=0;i< particle->numberOfDaughters();i++)
-//   {
-//     if(abs(particle->daughter(i)->pdgId())==24 || abs(particle->daughter(i)->pdgId())== 15)
-//       return TauFound((reco::GenParticle*)particle->daughter(i));
-//   }
-//   return particle;
-// }
 
 std::ostream& operator<<(std::ostream& os, const reco::GenParticle* particle)
 {
