@@ -145,7 +145,7 @@ process.load('WtoJPsiDs.Analysis.DumpGenParticles_cfi')
 
 process.analysisSequence = cms.Sequence(
     process.DumpPU
-    #*process.Preselection
+    *process.Preselection
     *process.DumpGenParticles
     *process.DumpReco
 )
