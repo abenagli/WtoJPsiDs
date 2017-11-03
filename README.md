@@ -9,4 +9,5 @@ Code to produce ntuples for the analysis of exclusive W decays
    git cms-init
    git clone -b CMSSW git@github.com:abenagli/DynamicTTree.git ExternalTools/DynamicTTree/
    git clone git@github.com:abenagli/WExclAnalysis.git
+   scram b -j 8
    ```
