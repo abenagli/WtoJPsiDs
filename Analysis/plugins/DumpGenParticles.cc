@@ -121,7 +121,7 @@ void DumpGenParticles::analyze(const edm::Event& iEvent, const edm::EventSetup& 
           GetFinalStateDaughters(daughter2,finalStateDaughters);
           
           for(size_t zz = 0; zz < finalStateDaughters.size(); ++zz)
-          {          
+          {
             resonanceDaughters2_[resonance][daughter].push_back( finalStateDaughters.at(zz) );
             
             temp_pt.push_back( finalStateDaughters.at(zz)->pt() );
@@ -135,7 +135,7 @@ void DumpGenParticles::analyze(const edm::Event& iEvent, const edm::EventSetup& 
           }
         }
         
-        dau2_n.push_back( daughter->numberOfDaughters() );
+        dau2_n.push_back( temp_pt.size() );
         dau2_pt.push_back( temp_pt );
         dau2_eta.push_back( temp_eta );
         dau2_phi.push_back( temp_phi );
@@ -168,124 +168,8 @@ void DumpGenParticles::analyze(const edm::Event& iEvent, const edm::EventSetup& 
     }
     
     outTree_.reso_n = resonances_.size();
-    
-    /*
-    // save electrons
-    if( abs(genParticle.pdgId()) == 11 )
-    {
-      const reco::GenParticle* Electron = &genParticle;
-      selectedElectron->push_back(*Electron);
-      selectedElectronPDGId->push_back(Electron->pdgId());
-      selectedElectronTauDecay->push_back(0);
-    }
-    
-    
-    // save muons
-    if( abs(genParticle.pdgId()) == 13 )
-    {
-      const reco::GenParticle* Muon = &genParticle;
-      selectedMuon->push_back(*Muon);
-      selectedMuonPDGId->push_back(Muon->pdgId());
-      selectedMuonTauDecay->push_back(0);
-    }
-    
-    
-    // save top
-    if (abs(genParticle.pdgId() ) == 6)
-    {
-      const reco::GenParticle* Top = TopFound(&genParticle);
-      selectedTop->push_back(*Top);
-      selectedTopPDGId->push_back(Top->pdgId());
-      
-      size_t topDaugthers = Top->numberOfDaughters();
-      for(size_t ii = 0; ii< topDaugthers; ++ii)
-      {
-        if(abs(Top->daughter(ii)->pdgId())==5) 
-        {
-          selectedBQuark->push_back( *((reco::GenParticle*)Top->daughter(ii)) );
-          selectedBQuarkPDGId->push_back(Top->daughter(ii)->pdgId());
-        }        
-      }
-    }
-    
-    
-    // save bosons
-    if ( ( ( abs(genParticle.pdgId())==24 || abs(genParticle.pdgId())==23 ) && genParticle.status()==22 ) || ( abs(genParticle.pdgId())==25 && genParticle.status()==62 ) ) // needs to be checked if this workes for Z 23 as well
-    {
-      const reco::GenParticle * FinalBoson = BosonFound(&genParticle);
-      selectedBoson->push_back(*FinalBoson);
-      selectedBosonPDGId->push_back(FinalBoson->pdgId());
-      
-      int isLeptonicW = 0;
-      size_t bosonDaugthers = FinalBoson->numberOfDaughters();
-      for(size_t ii = 0; ii< bosonDaugthers; ++ii)
-      {
-        if (abs(FinalBoson->daughter(ii)->pdgId())== 11 || abs(FinalBoson->daughter(ii)->pdgId())== 13)
-          isLeptonicW = 1;
-        
-        if(abs(FinalBoson->daughter(ii)->pdgId())== 11) 
-        {
-          selectedLepton->push_back( *((reco::GenParticle*)FinalBoson->daughter(ii)) );
-          selectedLeptonPDGId->push_back(FinalBoson->daughter(ii)->pdgId());
-        }
-        
-        if(abs(FinalBoson->daughter(ii)->pdgId())== 13) 
-        {
-          selectedLepton->push_back( *((reco::GenParticle*)FinalBoson->daughter(ii)) );
-          selectedLeptonPDGId->push_back(FinalBoson->daughter(ii)->pdgId());
-        }
-        
-        if(abs(FinalBoson->daughter(ii)->pdgId())== 15) 
-        {
-          selectedTau->push_back( *((reco::GenParticle*)FinalBoson->daughter(ii)) );
-          selectedLepton->push_back( *((reco::GenParticle*)FinalBoson->daughter(ii)) );
-          selectedLeptonPDGId->push_back(FinalBoson->daughter(ii)->pdgId());
-          
-          //selectedTauHadTronic->push_back(0);
-          const reco::GenParticle * FinalTauDecay = TauFound((reco::GenParticle*)FinalBoson->daughter(ii));
-          int hadTauDecay=1;
-          for(size_t iii=0; iii<FinalTauDecay->numberOfDaughters();iii++)
-          {
-            if(abs(FinalTauDecay->daughter(iii)->pdgId())== 11) 
-            {
-              selectedElectron->push_back( *((reco::GenParticle*)FinalTauDecay->daughter(iii)) );
-              selectedElectronTauDecay->push_back(1);
-              hadTauDecay=0;
-            }
-            if(abs(FinalTauDecay->daughter(iii)->pdgId())== 13) 
-            {
-              selectedMuon->push_back( *((reco::GenParticle*)FinalTauDecay->daughter(iii)) );
-              selectedMuonTauDecay->push_back(1);
-              hadTauDecay=0;
-            }
-          }
-          selectedTauHadTronic->push_back(hadTauDecay);
-        }
-        
-        if(abs(FinalBoson->daughter(ii)->pdgId())==12 || abs(FinalBoson->daughter(ii)->pdgId())==14 || abs(FinalBoson->daughter(ii)->pdgId())==16)
-        {
-          selectedNeutrino->push_back( *((reco::GenParticle*)FinalBoson->daughter(ii)) );
-          selectedNeutrinoPDGId->push_back(FinalBoson->daughter(ii)->pdgId());
-          selectedLepton->push_back( *((reco::GenParticle*)FinalBoson->daughter(ii)) );
-          selectedLeptonPDGId->push_back(FinalBoson->daughter(ii)->pdgId());
-        }
-        
-        if(abs(FinalBoson->daughter(ii)->pdgId())>=1 && abs(FinalBoson->daughter(ii)->pdgId())<=6)
-        {
-          selectedQuark->push_back( *((reco::GenParticle*)FinalBoson->daughter(ii)) );
-          selectedQuarkPDGId->push_back(FinalBoson->daughter(ii)->pdgId());
-        }
-        
-        if(abs(FinalBoson->daughter(ii)->pdgId())== 22) 
-        {
-          selectedLepton->push_back( *((reco::GenParticle*)FinalBoson->daughter(ii)) );
-          selectedLeptonPDGId->push_back(FinalBoson->daughter(ii)->pdgId());
-        }
-      }
-      isSelectedBosonLeptonic->push_back(isLeptonicW);
-    }
-    */
   }
+  
   
   if( verbosity_ )
   {
@@ -302,63 +186,21 @@ void DumpGenParticles::analyze(const edm::Event& iEvent, const edm::EventSetup& 
         const reco::GenParticle* daughter = (const reco::GenParticle*)(resonanceDaughters_[resonance].at(jj));
         std::cout << ">>>" << daughter << std::endl;
         
+        TLorentzVector daughter2Sum;
         for(unsigned int zz = 0; zz < (resonanceDaughters2_[resonance])[daughter].size(); ++zz)
         {
           const reco::GenParticle* daughter2 = (const reco::GenParticle*)((resonanceDaughters2_[resonance])[daughter].at(zz));
           std::cout << ">>>>>>" << daughter2 << std::endl;
+          
+          TLorentzVector temp;
+          temp.SetPtEtaPhiE(daughter2->pt(),daughter2->eta(),daughter2->phi(),daughter2->energy());
+          daughter2Sum += temp;
         }
+        std::cout << ">>>>>> mass of all decay products: " << daughter2Sum.M() << std::endl;
       }
     }
     std::cout << "<<< RESONANCES" << std::endl;
     
-    /*
-      for(unsigned int jj = 0; jj < selectedTop->size(); ++jj)
-      {
-      std::cout << ">>> TOP -- pdgId: " << std::fixed << std::setw(4) << (*selectedTop)[jj].pdgId()
-      << "   status: " << std::fixed << std::setw(4) << (*selectedTop)[jj].status()
-      << "   pT: "     << std::fixed << std::setprecision(2) << std::setw(8)  << (*selectedTop)[jj].pt()
-      << "   eta: "    << std::fixed << std::setprecision(2) << std::setw(10) << (*selectedTop)[jj].eta()
-      << "   mass: "   << std::fixed << std::setprecision(2) << std::setw(10) << (*selectedTop)[jj].mass()
-      << std::endl;
-      }
-
-      for(unsigned int jj = 0; jj < selectedBoson->size(); ++jj)
-      {
-      std::cout << ">>>     BOSON -- pdgId: " << std::fixed << std::setw(4) << (*selectedBoson)[jj].pdgId()
-      << "   status: " << std::fixed << std::setw(4) << (*selectedBoson)[jj].status()
-      << "   pT: "     << std::fixed << std::setprecision(2) << std::setw(8)  << (*selectedBoson)[jj].pt()
-      << "   eta: "    << std::fixed << std::setprecision(2) << std::setw(10) << (*selectedBoson)[jj].eta()
-      << "   mass: "   << std::fixed << std::setprecision(2) << std::setw(10) << (*selectedBoson)[jj].mass()
-      << std::endl;
-      }
-      for(unsigned int jj = 0; jj < selectedLepton->size(); ++jj)
-      {
-      std::cout << ">>>    LEPTON -- pdgId: " << std::fixed << std::setw(4) << (*selectedLepton)[jj].pdgId()
-      << "   status: " << std::fixed << std::setw(4) << (*selectedLepton)[jj].status()
-      << "   pT: "     << std::fixed << std::setprecision(2) << std::setw(8)  << (*selectedLepton)[jj].pt()
-      << "   eta: "    << std::fixed << std::setprecision(2) << std::setw(10) << (*selectedLepton)[jj].eta()
-      << "   mass: "   << std::fixed << std::setprecision(2) << std::setw(10) << (*selectedLepton)[jj].mass()
-      << std::endl;
-      }
-      for(unsigned int jj = 0; jj < selectedQuark->size(); ++jj)
-      {
-      std::cout << ">>>     QUARK -- pdgId: " << std::fixed << std::setw(4) << (*selectedQuark)[jj].pdgId()
-      << "   status: " << std::fixed << std::setw(4) << (*selectedQuark)[jj].status()
-      << "   pT: "     << std::fixed << std::setprecision(2) << std::setw(8)  << (*selectedQuark)[jj].pt()
-      << "   eta: "    << std::fixed << std::setprecision(2) << std::setw(10) << (*selectedQuark)[jj].eta()
-      << "   mass: "   << std::fixed << std::setprecision(2) << std::setw(10) << (*selectedQuark)[jj].mass()
-      << std::endl;
-      }
-      for(unsigned int jj = 0; jj < selectedBQuark->size(); ++jj)
-      {
-      std::cout << ">>>   B-QUARK -- pdgId: " << std::fixed << std::setw(4) << (*selectedBQuark)[jj].pdgId()
-      << "   status: " << std::fixed << std::setw(4) << (*selectedBQuark)[jj].status()
-      << "   pT: "     << std::fixed << std::setprecision(2) << std::setw(8)  << (*selectedBQuark)[jj].pt()
-      << "   eta: "    << std::fixed << std::setprecision(2) << std::setw(10) << (*selectedBQuark)[jj].eta()
-      << "   mass: "   << std::fixed << std::setprecision(2) << std::setw(10) << (*selectedBQuark)[jj].mass()
-      << std::endl;
-      }
-    */
     std::cout << "--------------------------" << std::endl;
   }
   

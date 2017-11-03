@@ -5,6 +5,7 @@
 <use   name="FWCore/ParameterSet"/>
 <use   name="CondFormats/DataRecord"/>
 <use   name="CondTools/Ecal"/>
+<use   name="SimDataFormats/PileupSummaryInfo"/>
 <use   name="DataFormats/VertexReco"/>
 <use   name="DataFormats/Provenance"/>
 <use   name="DataFormats/Math"/>

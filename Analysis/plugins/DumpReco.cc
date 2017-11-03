@@ -55,32 +55,11 @@ void DumpReco::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   }
   
   
-  //---fill vtx information
-  auto vtxs = *vtxsHandle_.product();
-  outTree_.vtxs_n = vtxs.size();
-  for(auto &vtx : *vtxsHandle_)
-  {
-    outTree_.vtxs_x -> push_back( vtx.x() );
-    outTree_.vtxs_y -> push_back( vtx.y() );
-    outTree_.vtxs_z -> push_back( vtx.z() );
-    outTree_.vtxs_t -> push_back( -99 );
-    outTree_.vtxs_normalizedChi2 -> push_back( vtx.normalizedChi2() );
-    
-    float sumPt = 0.;
-    float sumPt2 = 0.;
-    for(auto it = vtx.tracks_begin(); it != vtx.tracks_end(); ++it)
-    {
-      sumPt += (*it) -> pt();
-      sumPt2 += (*it)->pt() * (*it)->pt();
-    }
-    outTree_.vtxs_sumPt  -> push_back( sumPt );
-    outTree_.vtxs_sumPt2 -> push_back( sumPt2 );
-  }
-  
-  
   //---fill track information
   auto pfCandidates = *pfCandidatesHandle_.product();
   outTree_.pfCandidates_n = pfCandidates.size();
+  std::map<reco::VertexRef,float> sumPt;
+  std::map<reco::VertexRef,float> sumPt2;
   for(auto &pfCandidate : *pfCandidatesHandle_)
   {
     outTree_.pfCandidates_pt     -> push_back( pfCandidate.pt() );
@@ -92,11 +71,38 @@ void DumpReco::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     outTree_.pfCandidates_vx     -> push_back( pfCandidate.vx() );
     outTree_.pfCandidates_vy     -> push_back( pfCandidate.vy() );
     outTree_.pfCandidates_vz     -> push_back( pfCandidate.vz() );
-    outTree_.pfCandidates_dxy    -> push_back( pfCandidate.dxy() );
-    outTree_.pfCandidates_dz     -> push_back( pfCandidate.dzAssociatedPV() );
-    outTree_.pfCandidates_fromPV -> push_back( pfCandidate.fromPV() );
+    outTree_.pfCandidates_PV_x   -> push_back( pfCandidate.vertexRef()->x() );
+    outTree_.pfCandidates_PV_y   -> push_back( pfCandidate.vertexRef()->y() );
+    outTree_.pfCandidates_PV_z   -> push_back( pfCandidate.vertexRef()->z() );
+    outTree_.pfCandidates_dxy    -> push_back( pfCandidate.dxy((*vtxsHandle_)[0].position()) );
+    outTree_.pfCandidates_dxyErr -> push_back( pfCandidate.dxyError() );
+    outTree_.pfCandidates_dz     -> push_back( pfCandidate.dz((*vtxsHandle_)[0].position()) );
+    outTree_.pfCandidates_dzErr  -> push_back( pfCandidate.dzError() );
+    outTree_.pfCandidates_fromPV -> push_back( pfCandidate.fromPV(0) );
     outTree_.pfCandidates_pvAssociationQuality -> push_back( pfCandidate.pvAssociationQuality() );
     outTree_.pfCandidates_isHighPurity -> push_back( pfCandidate.trackHighPurity() );
+    
+    sumPt[pfCandidate.vertexRef()] += pfCandidate.pt();
+    sumPt2[pfCandidate.vertexRef()] += pow(pfCandidate.pt(),2);
+  }
+  
+  
+  //---fill vtx information
+  auto vtxs = *vtxsHandle_.product();
+  outTree_.vtxs_n = vtxs.size();
+  unsigned int it = 0;
+  for(auto &vtx : *vtxsHandle_)
+  {
+    outTree_.vtxs_x -> push_back( vtx.x() );
+    outTree_.vtxs_y -> push_back( vtx.y() );
+    outTree_.vtxs_z -> push_back( vtx.z() );
+    outTree_.vtxs_t -> push_back( -99 );
+    outTree_.vtxs_normalizedChi2 -> push_back( vtx.normalizedChi2() );
+    
+    reco::VertexRef vtxRef(vtxsHandle_,it);
+    outTree_.vtxs_sumPt  -> push_back( sumPt[vtxRef] );
+    outTree_.vtxs_sumPt2 -> push_back( sumPt2[vtxRef] );
+    ++it;
   }
   
   
@@ -110,6 +116,13 @@ void DumpReco::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     outTree_.muons_phi      -> push_back( muon.phi() );
     outTree_.muons_energy   -> push_back( muon.energy() );
     outTree_.muons_charge   -> push_back( muon.charge() );
+    outTree_.muons_vx       -> push_back( muon.vx() );
+    outTree_.muons_vy       -> push_back( muon.vy() );
+    outTree_.muons_vz       -> push_back( muon.vz() );
+    outTree_.muons_dxy      -> push_back( muon.muonBestTrack()->dxy((*vtxsHandle_)[0].position()) );
+    outTree_.muons_dxyErr   -> push_back( muon.muonBestTrack()->dxyError() );
+    outTree_.muons_dz       -> push_back( muon.muonBestTrack()->dz((*vtxsHandle_)[0].position()) );
+    outTree_.muons_dzErr    -> push_back( muon.muonBestTrack()->dzError() );
     outTree_.muons_isLoose  -> push_back( muon.isLooseMuon() );
     outTree_.muons_isMedium -> push_back( muon.isMediumMuon() );
     outTree_.muons_isTight  -> push_back( muon.isTightMuon((*vtxsHandle_)[0]) );
@@ -121,6 +134,13 @@ void DumpReco::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     outTree_.muons_pfIsoNeutralHadron   -> push_back( muon.pfIsolationR03().sumNeutralHadronEt );
     outTree_.muons_pfIsoPhoton          -> push_back( muon.pfIsolationR03().sumPhotonEt );
     outTree_.muons_pfIsoPU              -> push_back( muon.pfIsolationR03().sumPUPt );
+    
+    reco::TrackRef innerTrack = muon.innerTrack();
+    // std::cout << "pt: " << muon.pt() << "   innerTrack: " << innerTrack.isNull() << std::endl;
+    if( !innerTrack.isNull() )
+      outTree_.muons_trackerLayersWithMeasurement -> push_back( muon.innerTrack()->hitPattern().trackerLayersWithMeasurement() );
+    else
+      outTree_.muons_trackerLayersWithMeasurement -> push_back( -1 );
   }
   
   
@@ -149,6 +169,14 @@ void DumpReco::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     outTree_.jets_energy   -> push_back( jet.energy() );
     outTree_.jets_charge   -> push_back( jet.jetCharge() );
     outTree_.jets_numberOfDaughters -> push_back( jet.numberOfDaughters() );
+    
+    std::string constituentIds = "";
+    for(unsigned int it = 0; it <  jet.numberOfSourceCandidatePtrs(); ++it)
+    {
+      reco::CandidatePtr pfCand = jet.sourceCandidatePtr(it);
+      constituentIds += Form("%d,",int(pfCand.key()));
+    }
+    outTree_.jets_constituentIds -> push_back( constituentIds );
   }
   
   

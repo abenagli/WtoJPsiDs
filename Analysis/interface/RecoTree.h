@@ -40,8 +40,13 @@
   DATA(std::vector<float>, pfCandidates_vx) \
   DATA(std::vector<float>, pfCandidates_vy) \
   DATA(std::vector<float>, pfCandidates_vz) \
+  DATA(std::vector<float>, pfCandidates_PV_x) \
+  DATA(std::vector<float>, pfCandidates_PV_y) \
+  DATA(std::vector<float>, pfCandidates_PV_z) \
   DATA(std::vector<float>, pfCandidates_dxy) \
+  DATA(std::vector<float>, pfCandidates_dxyErr) \
   DATA(std::vector<float>, pfCandidates_dz) \
+  DATA(std::vector<float>, pfCandidates_dzErr) \
   DATA(std::vector<int>,   pfCandidates_fromPV) \
   DATA(std::vector<int>,   pfCandidates_pvAssociationQuality) \
   DATA(std::vector<int>,   pfCandidates_isHighPurity) \
@@ -50,6 +55,13 @@
   DATA(std::vector<float>, muons_phi) \
   DATA(std::vector<float>, muons_energy) \
   DATA(std::vector<int>,   muons_charge) \
+  DATA(std::vector<float>, muons_vx) \
+  DATA(std::vector<float>, muons_vy) \
+  DATA(std::vector<float>, muons_vz) \
+  DATA(std::vector<float>, muons_dxy) \
+  DATA(std::vector<float>, muons_dxyErr) \
+  DATA(std::vector<float>, muons_dz) \
+  DATA(std::vector<float>, muons_dzErr) \
   DATA(std::vector<float>, muons_isLoose) \
   DATA(std::vector<float>, muons_isMedium) \
   DATA(std::vector<float>, muons_isTight) \
@@ -61,6 +73,7 @@
   DATA(std::vector<float>, muons_pfIsoNeutralHadron) \
   DATA(std::vector<float>, muons_pfIsoPhoton) \
   DATA(std::vector<float>, muons_pfIsoPU) \
+  DATA(std::vector<int>,   muons_trackerLayersWithMeasurement) \
   DATA(std::vector<float>, taus_pt) \
   DATA(std::vector<float>, taus_eta) \
   DATA(std::vector<float>, taus_phi) \
@@ -72,7 +85,8 @@
   DATA(std::vector<float>, jets_phi) \
   DATA(std::vector<float>, jets_energy) \
   DATA(std::vector<int>,   jets_charge) \
-  DATA(std::vector<int>,   jets_numberOfDaughters) 
+  DATA(std::vector<int>,   jets_numberOfDaughters) \
+  DATA(std::vector<std::string>,   jets_constituentIds) 
   
 #include "ExternalTools/DynamicTTree/interface/DynamicTTreeInterface.h"
 
