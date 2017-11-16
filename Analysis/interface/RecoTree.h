@@ -18,8 +18,15 @@
   DATA(int, pfCandidates_n) \
   DATA(int, muons_n) \
   DATA(int, taus_n) \
-  DATA(int, jets_n)
-
+  DATA(int, jets_n) \
+  DATA(int, jets_puppi_n) \
+  DATA(float, met_pt) \
+  DATA(float, met_phi) \
+  DATA(float, met_sig) \
+  DATA(float, met_puppi_pt) \
+  DATA(float, met_puppi_phi) \
+  DATA(float, met_puppi_sig) \
+  
 #define DATA_CLASS_TABLE \
   DATA(std::vector<std::string>, trgs_name) \
   DATA(std::vector<int>, trgs_pass) \
@@ -86,7 +93,16 @@
   DATA(std::vector<float>, jets_energy) \
   DATA(std::vector<int>,   jets_charge) \
   DATA(std::vector<int>,   jets_numberOfDaughters) \
-  DATA(std::vector<std::string>,   jets_constituentIds) 
+  DATA(std::vector<std::string>, jets_constituentIds) \
+  DATA(std::vector<std::vector<float> >, jets_bTag) \
+  DATA(std::vector<float>, jets_puppi_pt) \
+  DATA(std::vector<float>, jets_puppi_eta) \
+  DATA(std::vector<float>, jets_puppi_phi) \
+  DATA(std::vector<float>, jets_puppi_energy) \
+  DATA(std::vector<int>,   jets_puppi_charge) \
+  DATA(std::vector<int>,   jets_puppi_numberOfDaughters) \
+  DATA(std::vector<std::string>, jets_puppi_constituentIds) \
+  DATA(std::vector<std::vector<float> >, jets_puppi_bTag)
   
 #include "ExternalTools/DynamicTTree/interface/DynamicTTreeInterface.h"
 

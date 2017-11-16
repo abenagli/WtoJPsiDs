@@ -3,8 +3,9 @@
 
 
 DumpGenParticles::DumpGenParticles(const edm::ParameterSet& pSet):
-  genParticlesToken_(consumes<reco::GenParticleCollection>(pSet.getUntrackedParameter<edm::InputTag>("genParticlesTag"))),
-  genJetsToken_     (consumes<edm::View<reco::GenJet> >   (pSet.getUntrackedParameter<edm::InputTag>("genJetsTag"))),
+  genParticlesToken_(consumes<reco::GenParticleCollection>    (pSet.getUntrackedParameter<edm::InputTag>("genParticlesTag"))),
+  genJetsToken_     (consumes<edm::View<reco::GenJet> >       (pSet.getUntrackedParameter<edm::InputTag>("genJetsTag"))),
+  puInfoToken_      (consumes<std::vector<PileupSummaryInfo> >(pSet.getUntrackedParameter<edm::InputTag>("puInfoTag"))),
   verbosity_(pSet.getParameter<bool>("verbosity"))
 {
   //---TFileService for output ntuples
@@ -219,6 +220,22 @@ void DumpGenParticles::analyze(const edm::Event& iEvent, const edm::EventSetup& 
     outTree_.genJets_phi      -> push_back( genJet.phi() );
     outTree_.genJets_energy   -> push_back( genJet.energy() );
     outTree_.genJets_numberOfDaughters -> push_back( genJet.numberOfDaughters() );
+  }
+  
+  
+  //---load PU info
+  iEvent.getByToken(puInfoToken_, puInfoHandle_);
+  auto puInfo = *puInfoHandle_.product();
+  
+  for(std::vector<PileupSummaryInfo>::const_iterator PVIt = puInfo.begin(); PVIt != puInfo.end(); ++PVIt)
+  {
+    int BX = PVIt -> getBunchCrossing();
+
+    if( BX == 0 )
+    {
+      outTree_.trueNumInteractions = PVIt -> getTrueNumInteractions();
+      continue;
+    }
   }
   
   

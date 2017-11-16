@@ -22,6 +22,7 @@
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "DataFormats/PatCandidates/interface/Tau.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
+#include "DataFormats/PatCandidates/interface/MET.h"
 #include "DataFormats/PatCandidates/interface/PackedCandidate.h"
 #include "DataFormats/PatCandidates/interface/PackedTriggerPrescales.h"
 
@@ -59,6 +60,14 @@ private:
   edm::EDGetTokenT<pat::TauCollection>                       tausToken_;
   edm::Handle<pat::JetCollection>                           jetsHandle_;
   edm::EDGetTokenT<pat::JetCollection>                       jetsToken_;
+  edm::Handle<pat::JetCollection>                      jetsPuppiHandle_;
+  edm::EDGetTokenT<pat::JetCollection>                  jetsPuppiToken_;
+  edm::Handle<pat::METCollection>                           metsHandle_;
+  edm::EDGetTokenT<pat::METCollection>                       metsToken_;
+  edm::Handle<pat::METCollection>                      metsPuppiHandle_;
+  edm::EDGetTokenT<pat::METCollection>                  metsPuppiToken_;
+  
+  std::vector<std::string> bDiscriminators_;
   
   //---options
   

@@ -14,7 +14,8 @@
   DATA(int, lumi) \
   DATA(int, run) \
   DATA(int, reso_n) \
-  DATA(int, genJets_n)
+  DATA(int, genJets_n) \
+  DATA(int, trueNumInteractions) \
   
 #define DATA_CLASS_TABLE \
   DATA(std::vector<float>, reso_pt)  \

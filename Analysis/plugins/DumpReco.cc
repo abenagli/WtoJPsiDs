@@ -9,7 +9,11 @@ DumpReco::DumpReco(const edm::ParameterSet& pSet) :
   pfCandidatesToken_(consumes<edm::View<pat::PackedCandidate> >(pSet.getUntrackedParameter<edm::InputTag>("pfCandidatesTag"))),
   muonsToken_       (consumes<pat::MuonCollection>             (pSet.getUntrackedParameter<edm::InputTag>("muonsTag"))),
   tausToken_        (consumes<pat::TauCollection>              (pSet.getUntrackedParameter<edm::InputTag>("tausTag"))),
-  jetsToken_        (consumes<pat::JetCollection>              (pSet.getUntrackedParameter<edm::InputTag>("jetsTag")))
+  jetsToken_        (consumes<pat::JetCollection>              (pSet.getUntrackedParameter<edm::InputTag>("jetsTag"))),
+  jetsPuppiToken_   (consumes<pat::JetCollection>              (pSet.getUntrackedParameter<edm::InputTag>("jetsPuppiTag"))),
+  metsToken_        (consumes<pat::METCollection>              (pSet.getUntrackedParameter<edm::InputTag>("metsTag"))),
+  metsPuppiToken_   (consumes<pat::METCollection>              (pSet.getUntrackedParameter<edm::InputTag>("metsPuppiTag"))),
+  bDiscriminators_                                             (pSet.getUntrackedParameter<std::vector<std::string> >("bDiscriminators"))
 {
   //---TFileService for output ntuples
   if( !fs_ )
@@ -34,6 +38,9 @@ void DumpReco::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   iEvent.getByToken(muonsToken_,               muonsHandle_);
   iEvent.getByToken(tausToken_,                 tausHandle_);
   iEvent.getByToken(jetsToken_,                 jetsHandle_);
+  iEvent.getByToken(jetsPuppiToken_,       jetsPuppiHandle_);
+  iEvent.getByToken(metsToken_,                 metsHandle_);
+  iEvent.getByToken(metsPuppiToken_,       metsPuppiHandle_);
   
   
   //---reset output
@@ -177,6 +184,58 @@ void DumpReco::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       constituentIds += Form("%d,",int(pfCand.key()));
     }
     outTree_.jets_constituentIds -> push_back( constituentIds );
+    
+    std::vector<float> bTagValues;
+    for(const std::string& bDiscr : bDiscriminators_)
+      bTagValues.push_back( jet.bDiscriminator(bDiscr) );
+    outTree_.jets_bTag -> push_back( bTagValues );
+  }
+  
+  
+  //---fill puppi jets information
+  auto jetsPuppi = *jetsPuppiHandle_.product();
+  outTree_.jets_puppi_n = jetsPuppi.size();
+  for(auto &jet : *jetsPuppiHandle_)
+  {
+    outTree_.jets_puppi_pt       -> push_back( jet.pt() );
+    outTree_.jets_puppi_eta      -> push_back( jet.eta() );
+    outTree_.jets_puppi_phi      -> push_back( jet.phi() );
+    outTree_.jets_puppi_energy   -> push_back( jet.energy() );
+    outTree_.jets_puppi_charge   -> push_back( jet.jetCharge() );
+    outTree_.jets_puppi_numberOfDaughters -> push_back( jet.numberOfDaughters() );
+    
+    std::string constituentIds = "";
+    for(unsigned int it = 0; it <  jet.numberOfSourceCandidatePtrs(); ++it)
+    {
+      reco::CandidatePtr pfCand = jet.sourceCandidatePtr(it);
+      constituentIds += Form("%d,",int(pfCand.key()));
+    }
+    outTree_.jets_puppi_constituentIds -> push_back( constituentIds );
+    
+    std::vector<float> bTagValues;
+    for(const std::string& bDiscr : bDiscriminators_)
+      bTagValues.push_back( jet.bDiscriminator(bDiscr) );
+    outTree_.jets_puppi_bTag -> push_back( bTagValues );
+  }
+  
+  
+  //---fill met information
+  auto mets = *metsHandle_.product();
+  for(auto &met : *metsHandle_)
+  {
+    outTree_.met_pt  = met.pt();
+    outTree_.met_phi = met.phi();
+    outTree_.met_sig = met.metSignificance();
+  }
+  
+  
+  //---fill puppi met information
+  auto metsPuppi = *metsPuppiHandle_.product();
+  for(auto &met : *metsPuppiHandle_)
+  {
+    outTree_.met_puppi_pt  = met.pt();
+    outTree_.met_puppi_phi = met.phi();
+    outTree_.met_puppi_sig = met.metSignificance();
   }
   
   

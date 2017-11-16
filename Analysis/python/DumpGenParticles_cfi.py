@@ -5,6 +5,7 @@ DumpGenParticles = cms.EDAnalyzer(
     ###---Input tags
     genParticlesTag = cms.untracked.InputTag("prunedGenParticles"),
     genJetsTag = cms.untracked.InputTag("slimmedGenJets"),
+    puInfoTag = cms.untracked.InputTag("slimmedAddPileupInfo"),
     
     ###---I/O options
     treeName = cms.untracked.string("gen_tree"),

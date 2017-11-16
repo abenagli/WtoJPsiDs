@@ -16,6 +16,8 @@
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "DataFormats/JetReco/interface/GenJet.h"
 
+#include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
+
 
 
 class DumpGenParticles : public edm::EDAnalyzer
@@ -39,6 +41,8 @@ private:
   edm::EDGetTokenT<reco::GenParticleCollection> genParticlesToken_;
   edm::Handle<edm::View<reco::GenJet> >             genJetsHandle_;
   edm::EDGetTokenT<edm::View<reco::GenJet> >         genJetsToken_;
+  edm::EDGetTokenT<std::vector<PileupSummaryInfo> >   puInfoToken_;
+  edm::Handle<std::vector<PileupSummaryInfo> >       puInfoHandle_;
   bool verbosity_;
   
   //---outputs
