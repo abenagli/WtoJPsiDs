@@ -1,8 +1,6 @@
 #ifndef _DUMP_PU_
 #define _DUMP_PU_
 
-#include "WtoJPsiDs/Analysis/interface/PUTree.h"
-
 #include "FWCore/Framework/interface/ESHandle.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/Framework/interface/EDAnalyzer.h"
@@ -44,7 +42,6 @@ private:
   
   //---outputs
   edm::Service<TFileService> fs_;
-  PUTree outTree_;
   TH1F* histo_;
   
   int entry_;

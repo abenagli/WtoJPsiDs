@@ -40,7 +40,8 @@ process.source = cms.Source(
     duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
     skipEvents = cms.untracked.uint32(0),
     fileNames = cms.untracked.vstring(
-        'file:/gwteraz/users/benaglia/907579B8-7D8F-E611-97CA-001EC9ED4F72.root'
+        #'file:/gwteraz/users/benaglia/AEB9EE48-BA9F-E611-8125-FA163E0B42C3.root'
+        'file:/gwteraz/users/benaglia/EAF4B531-B69F-E611-94DE-FA163E2648F2.root'
         )
     )
 
@@ -50,7 +51,7 @@ process.source = cms.Source(
 #--------------
 process.TFileService = cms.Service(
     "TFileService", 
-    fileName = cms.string("ntuple_data.root"),
+    fileName = cms.string("ntuple_data_muonia.root"),
     closeFileFast = cms.untracked.bool(True)
     )
 

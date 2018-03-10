@@ -136,11 +136,11 @@ void DumpReco::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     outTree_.muons_trackIso -> push_back( muon.trackIso() );
     outTree_.muons_ecalIso  -> push_back( muon.ecalIso() );
     outTree_.muons_hcalIso  -> push_back( muon.hcalIso() );
-    outTree_.muons_pfIsoChargedHadron   -> push_back( muon.pfIsolationR03().sumChargedHadronPt );
-    outTree_.muons_pfIsoChargedParticle -> push_back( muon.pfIsolationR03().sumChargedParticlePt );
-    outTree_.muons_pfIsoNeutralHadron   -> push_back( muon.pfIsolationR03().sumNeutralHadronEt );
-    outTree_.muons_pfIsoPhoton          -> push_back( muon.pfIsolationR03().sumPhotonEt );
-    outTree_.muons_pfIsoPU              -> push_back( muon.pfIsolationR03().sumPUPt );
+    outTree_.muons_pfIsoChargedHadron   -> push_back( muon.pfIsolationR04().sumChargedHadronPt );
+    outTree_.muons_pfIsoChargedParticle -> push_back( muon.pfIsolationR04().sumChargedParticlePt );
+    outTree_.muons_pfIsoNeutralHadron   -> push_back( muon.pfIsolationR04().sumNeutralHadronEt );
+    outTree_.muons_pfIsoPhoton          -> push_back( muon.pfIsolationR04().sumPhotonEt );
+    outTree_.muons_pfIsoPU              -> push_back( muon.pfIsolationR04().sumPUPt );
     
     reco::TrackRef innerTrack = muon.innerTrack();
     // std::cout << "pt: " << muon.pt() << "   innerTrack: " << innerTrack.isNull() << std::endl;
